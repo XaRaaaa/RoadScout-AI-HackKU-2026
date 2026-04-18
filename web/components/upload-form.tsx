@@ -24,6 +24,7 @@ export function UploadForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    const form = event.currentTarget;
 
     if (!file) {
       setStatus("Choose a photo first.");
@@ -51,7 +52,7 @@ export function UploadForm() {
       setStatus("Upload complete.");
       setFile(null);
       setPreviewUrl("");
-      event.currentTarget.reset();
+      form.reset();
       router.refresh();
     } catch (error) {
       const message =

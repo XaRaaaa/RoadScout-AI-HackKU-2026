@@ -87,7 +87,7 @@ export default async function HomePage() {
               maxWidth: 700,
             }}
           >
-            Photo intake for your future analysis pipeline.
+            Asphalt photo intake for future analysis.
           </h1>
           <p
             style={{

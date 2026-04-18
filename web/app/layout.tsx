@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "HackKU Photo Intake",
+  title: "Concrete Distress Analysis Tool",
   description: "Simple photo upload boilerplate with Next.js and MongoDB.",
 };
 
