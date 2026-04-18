@@ -1,0 +1,17 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+
+# Model artifacts and local data
+artifacts/
+data/
+
+# OS/editor
+.DS_Store
+.vscode/
