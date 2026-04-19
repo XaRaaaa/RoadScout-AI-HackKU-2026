@@ -1,24 +1,30 @@
 import { MongoClient } from "mongodb";
 
-const uri = process.env.MONGODB_URI;
-const dbName = process.env.MONGODB_DB;
-
-if (!uri) {
-  throw new Error("Missing MONGODB_URI in environment.");
-}
-
-if (!dbName) {
-  throw new Error("Missing MONGODB_DB in environment.");
-}
-
-const mongoUri = uri;
-const mongoDatabaseName = dbName;
-
 declare global {
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
-function getClientPromise() {
+function getMongoConfig() {
+  const mongoUri = process.env.MONGODB_URI;
+  const mongoDatabaseName = process.env.MONGODB_DB ?? process.env.MONGO_DB_NAME;
+
+  if (!mongoUri) {
+    throw new Error("Missing MONGODB_URI in environment.");
+  }
+
+  if (!mongoDatabaseName) {
+    throw new Error(
+      "Missing MONGODB_DB in environment. Set MONGODB_DB or MONGO_DB_NAME.",
+    );
+  }
+
+  return {
+    mongoUri,
+    mongoDatabaseName,
+  };
+}
+
+function getClientPromise(mongoUri: string) {
   if (!global._mongoClientPromise) {
     const client = new MongoClient(mongoUri, {
       serverSelectionTimeoutMS: 5000,
@@ -30,8 +36,10 @@ function getClientPromise() {
 }
 
 export async function getDatabase() {
+  const { mongoUri, mongoDatabaseName } = getMongoConfig();
+
   try {
-    const connectedClient = await getClientPromise();
+    const connectedClient = await getClientPromise(mongoUri);
     return connectedClient.db(mongoDatabaseName);
   } catch (error) {
     global._mongoClientPromise = undefined;

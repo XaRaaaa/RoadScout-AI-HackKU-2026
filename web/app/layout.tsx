@@ -3,8 +3,9 @@ import "leaflet/dist/leaflet.css";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Concrete Distress Analysis Tool",
-  description: "Simple photo upload boilerplate with Next.js and MongoDB.",
+  title: "RoadScout",
+  description:
+    "RoadScout maps road-damage reports with local classifier results and Gemini guidance.",
 };
 
 export default function RootLayout({

@@ -6,10 +6,23 @@ export type StoredPhoto = {
   contentType: string;
   uploadedAt: string;
   size: number;
+  analysisStatus?: string;
+  analysisNote?: string;
+  analysisSummary?: string;
+  authorityToReport?: string;
+  classifier?: {
+    modelName: string;
+    imageSize: number;
+    prediction: string;
+    confidence: number;
+    severity: string;
+    recommendedAction: string;
+  };
   address?: string;
   location?: {
     latitude: number;
     longitude: number;
+    accuracyMeters?: number;
   };
 };
 

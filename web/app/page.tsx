@@ -19,6 +19,15 @@ type PotholeItem = {
   contentType: string;
   uploadedAt: string;
   size: number;
+  analysisStatus?: string;
+  analysisSummary?: string;
+  authorityToReport?: string;
+  classifier?: {
+    prediction: string;
+    confidence: number;
+    severity: string;
+    recommendedAction: string;
+  };
   address?: string;
   latitude?: number;
   longitude?: number;
@@ -37,6 +46,10 @@ async function getPhotos() {
             contentType: 1,
             uploadedAt: 1,
             size: 1,
+            analysisStatus: 1,
+            analysisSummary: 1,
+            authorityToReport: 1,
+            classifier: 1,
             address: 1,
             location: 1,
           },
@@ -63,6 +76,29 @@ async function getPhotos() {
           contentType: String(photo.contentType),
           uploadedAt: new Date(photo.uploadedAt).toLocaleString(),
           size: Number(photo.size),
+          analysisStatus:
+            typeof photo.analysisStatus === "string"
+              ? photo.analysisStatus
+              : undefined,
+          analysisSummary:
+            typeof photo.analysisSummary === "string"
+              ? photo.analysisSummary
+              : undefined,
+          authorityToReport:
+            typeof photo.authorityToReport === "string"
+              ? photo.authorityToReport
+              : undefined,
+          classifier:
+            photo.classifier && typeof photo.classifier === "object"
+              ? {
+                  prediction: String(photo.classifier.prediction ?? ""),
+                  confidence: Number(photo.classifier.confidence ?? 0),
+                  severity: String(photo.classifier.severity ?? "unknown"),
+                  recommendedAction: String(
+                    photo.classifier.recommendedAction ?? "",
+                  ),
+                }
+              : undefined,
           address:
             typeof photo.address === "string" ? photo.address : undefined,
           latitude,
@@ -106,6 +142,27 @@ export default async function HomePage() {
         padding: "40px 16px 80px",
       }}
     >
+      <a
+        href="mailto:gael.salazar034@gmail.com?subject=RoadScout%20Feedback"
+        style={{
+          position: "fixed",
+          right: 16,
+          top: 16,
+          zIndex: 1200,
+          borderRadius: 999,
+          border: "1px solid rgba(255, 205, 103, 0.5)",
+          background: "rgba(19, 19, 19, 0.88)",
+          boxShadow: "0 10px 30px rgba(0, 0, 0, 0.45)",
+          color: "var(--accent-dark)",
+          textDecoration: "none",
+          padding: "10px 14px",
+          fontWeight: 700,
+          fontSize: 14,
+        }}
+      >
+        Submit Feedback
+      </a>
+
       <section
         style={{
           maxWidth: 1180,
@@ -135,7 +192,7 @@ export default async function HomePage() {
               color: "var(--accent-dark)",
             }}
           >
-            Street Wear Monitor
+            RoadScout
           </p>
           <h1
             style={{
@@ -145,7 +202,7 @@ export default async function HomePage() {
               maxWidth: 860,
             }}
           >
-            Log potholes, pin damage, and map the trouble spots.
+            RoadScout
           </h1>
           <p
             style={{
@@ -156,9 +213,9 @@ export default async function HomePage() {
               color: "var(--muted)",
             }}
           >
-            Capture road damage with a photo, attach a street address, and keep
-            the field team aligned with one upload queue, one pothole list, and
-            one live map.
+            Upload a road-damage photo, share your live location for geocoding,
+            and get a local AI classifier result plus a Gemini-generated report
+            brief and authority contact recommendation.
           </p>
         </section>
 
@@ -187,8 +244,8 @@ export default async function HomePage() {
                 lineHeight: 1.6,
               }}
             >
-              Add a road-damage image, enter the street address, and push it into
-              the pothole queue.
+              Add a road-damage image, allow location access when prompted, and
+              review the classifier and Gemini outputs before reporting.
             </p>
             <UploadForm />
 
@@ -197,7 +254,7 @@ export default async function HomePage() {
                 style={{
                   marginTop: 16,
                   marginBottom: 0,
-                  color: "#365f9d",
+                  color: "#f4c574",
                   lineHeight: 1.6,
                 }}
               >
@@ -247,7 +304,7 @@ export default async function HomePage() {
                   style={{
                     borderRadius: 22,
                     padding: "18px 20px",
-                    background: "rgba(255,255,255,0.62)",
+                    background: "rgba(22, 22, 22, 0.76)",
                     border: "1px solid var(--card-border)",
                   }}
                 >
@@ -260,7 +317,7 @@ export default async function HomePage() {
                   style={{
                     borderRadius: 22,
                     padding: "18px 20px",
-                    background: "rgba(255,255,255,0.62)",
+                    background: "rgba(22, 22, 22, 0.76)",
                     border: "1px solid var(--card-border)",
                   }}
                 >
@@ -307,7 +364,7 @@ export default async function HomePage() {
                       padding: "14px",
                       borderRadius: 22,
                       border: "1px solid var(--card-border)",
-                      background: "rgba(255,255,255,0.54)",
+                      background: "rgba(20, 20, 20, 0.8)",
                     }}
                   >
                     <div
@@ -316,7 +373,7 @@ export default async function HomePage() {
                         aspectRatio: "1 / 1",
                         borderRadius: 18,
                         overflow: "hidden",
-                        background: "#d8e8fb",
+                        background: "#2a2a2a",
                       }}
                     >
                       <Image
@@ -348,7 +405,7 @@ export default async function HomePage() {
                           lineHeight: 1.5,
                         }}
                       >
-                        {formatFileSize(photo.size)} · {photo.uploadedAt}
+                        {formatFileSize(photo.size)} - {photo.uploadedAt}
                       </div>
                       <div
                         style={{
@@ -360,6 +417,47 @@ export default async function HomePage() {
                       >
                         {formatAddress(photo)}
                       </div>
+
+                      {photo.classifier ? (
+                        <div
+                          style={{
+                            marginTop: 8,
+                            fontSize: 13,
+                            lineHeight: 1.5,
+                            color: "var(--accent-dark)",
+                          }}
+                        >
+                          {photo.classifier.prediction} -
+                          {` ${(photo.classifier.confidence * 100).toFixed(1)}%`} -
+                          {` ${photo.classifier.severity}`}
+                        </div>
+                      ) : null}
+
+                      {photo.analysisSummary ? (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            fontSize: 13,
+                            lineHeight: 1.5,
+                            color: "var(--muted)",
+                          }}
+                        >
+                          {photo.analysisSummary}
+                        </div>
+                      ) : null}
+
+                      {photo.authorityToReport ? (
+                        <div
+                          style={{
+                            marginTop: 6,
+                            fontSize: 13,
+                            lineHeight: 1.5,
+                            color: "var(--text)",
+                          }}
+                        >
+                          Report to: {photo.authorityToReport}
+                        </div>
+                      ) : null}
                     </div>
                   </article>
                 ))}
